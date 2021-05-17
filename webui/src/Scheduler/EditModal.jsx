@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { CButton, CForm, CFormGroup, CInput, CModal, CModalBody, CModalFooter, CModalHeader } from '@coreui/react'
-import { MyErrorBoundary, useMountEffect } from '../util'
+import { CompanionContext, MyErrorBoundary, socketEmit, useMountEffect } from '../util'
 import Select from 'react-select'
+import { AddFeedbackDropdown, FeedbackEditor } from '../Buttons/EditButton/FeedbackPanel'
 
 function getPluginSpecDefaults(pluginOptions) {
 	const config = {}
@@ -49,6 +50,7 @@ export function ScheduleEditModal({ doClose, doSave, item, plugins }) {
 			const pluginSpec = plugins?.find((p) => p.type === pluginType)
 			const pluginOptions = pluginSpec?.options || []
 
+			console.log('pluginType', pluginType)
 			const innerConfig = getPluginSpecDefaults(pluginOptions)
 			const innerConfig2 = pluginSpec?.multiple ? [innerConfig] : innerConfig
 
@@ -57,7 +59,7 @@ export function ScheduleEditModal({ doClose, doSave, item, plugins }) {
 				button: '',
 				...oldConfig,
 				type: pluginType,
-				config: innerConfig2,
+				config: pluginType === 'feedback' ? [] : innerConfig2,
 			}))
 		},
 		[plugins]
@@ -136,6 +138,8 @@ export function ScheduleEditModal({ doClose, doSave, item, plugins }) {
 }
 
 function ScheduleEditModalConfig({ pluginSpec, config, updateConfig }) {
+	const context = useContext(CompanionContext)
+
 	const updateInnerConfig = useCallback(
 		(id, val) => {
 			updateConfig('config', {
@@ -156,15 +160,70 @@ function ScheduleEditModalConfig({ pluginSpec, config, updateConfig }) {
 		},
 		[config, updateConfig]
 	)
+	const updateFeedbackOptionConfig = useCallback(
+		(index, id, val) => {
+			const newConfig = [...config]
+			console.log('set', newConfig[index].options, id, val)
+			newConfig[index] = {
+				...newConfig[index],
+				options: {
+					...newConfig[index].options,
+					[id]: val,
+				},
+			}
+			updateConfig('config', newConfig)
+		},
+		[config, updateConfig]
+	)
 
 	const addRow = useCallback(() => {
 		updateConfig('config', [...config, getPluginSpecDefaults(pluginSpec.options)])
 	}, [updateConfig, config, pluginSpec])
+	const addFeedbackSelect = useCallback(
+		(feedbackType) => {
+			socketEmit(context.socket, 'feedback_get_defaults', [feedbackType]).then(([fb]) => {
+				updateConfig('config', [...config, fb])
+			})
+		},
+		[context.socket, config, updateConfig]
+	)
 
 	const delRow = (i) => {
 		const config2 = [...config]
 		config2.splice(i, 1)
 		updateConfig('config', config2)
+	}
+
+	// This is a bit of a hack:
+	if (pluginSpec.type === 'feedback') {
+		return (
+			<>
+				<table style={{ width: '100%' }}>
+					<thead>
+						<tr>
+							<th>Feedbacks</th>
+						</tr>
+					</thead>
+					<tbody>
+						{config.map((conf, i) => (
+							<tr key={i}>
+								<td>
+									<MyErrorBoundary>
+										<FeedbackEditor
+											feedback={conf}
+											setValue={(id, k, v) => updateFeedbackOptionConfig(i, k, v)}
+											innerDelete={() => delRow(i)}
+										/>
+									</MyErrorBoundary>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+
+				<AddFeedbackDropdown onSelect={addFeedbackSelect} booleanOnly />
+			</>
+		)
 	}
 
 	if (pluginSpec.multiple) {
@@ -256,6 +315,9 @@ function ScheduleEditModalInput({ spec, value, onChange }) {
 					required
 				/>
 			)
+		}
+		case 'feedback': {
+			return <p>TODO</p>
 		}
 		default:
 			return <p>Unknown input: "{spec.type}"</p>
