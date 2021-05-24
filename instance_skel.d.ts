@@ -86,7 +86,10 @@ declare abstract class InstanceSkel<TConfig> {
 
 	setVariable(variableId: string, value: string): void
 	getVariable(variableId: string, cb: (value: string) => void): void
-	checkFeedbacks(...feedbackIds: string[]): void
+	/** Recheck all feedbacks of the given types. eg `self.checkFeedbacks('bank_style', 'bank_text')` or `self.checkFeedbacks` */
+	checkFeedbacks(...feedbackTypes: string[]): void
+	/** Recheck all feedbacks of the given ids. eg `self.checkFeedbacksById('vvbta3jtaD', 'Ba_1C3NF3q')` */
+	checkFeedbacksById(...feedbackIds: string[]): void
 
 	/**
 	 * Parse a string to replace any variable references with their values.

@@ -317,7 +317,13 @@ instance.prototype.setPresetDefinitions = function (presets) {
 instance.prototype.checkFeedbacks = function (...types) {
 	var self = this
 
-	self.system.emit('feedback_instance_check', self, types)
+	self.system.emit('feedback_check_all', { instance_id: self.id, feedback_types: types })
+}
+
+instance.prototype.checkFeedbacksById = function (...ids) {
+	var self = this
+
+	self.system.emit('feedback_check_all', { instance_id: self.id, feedback_ids: ids })
 }
 
 instance.prototype.getAllFeedbacks = function () {
