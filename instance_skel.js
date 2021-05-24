@@ -314,10 +314,10 @@ instance.prototype.setPresetDefinitions = function (presets) {
 	self.system.emit('preset_instance_definitions_set', self, presets)
 }
 
-instance.prototype.checkFeedbacks = function (type) {
+instance.prototype.checkFeedbacks = function (...types) {
 	var self = this
 
-	self.system.emit('feedback_instance_check', self, type)
+	self.system.emit('feedback_instance_check', self, types)
 }
 
 instance.prototype.getAllFeedbacks = function () {

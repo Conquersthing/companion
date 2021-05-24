@@ -86,7 +86,7 @@ declare abstract class InstanceSkel<TConfig> {
 
 	setVariable(variableId: string, value: string): void
 	getVariable(variableId: string, cb: (value: string) => void): void
-	checkFeedbacks(feedbackId?: string): void
+	checkFeedbacks(...feedbackIds: string[]): void
 
 	/**
 	 * Parse a string to replace any variable references with their values.
