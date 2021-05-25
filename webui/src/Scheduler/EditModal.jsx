@@ -95,6 +95,7 @@ export function ScheduleEditModal({ doClose, doSave, item, plugins }) {
 						<label>Name</label>
 						<CInput required value={config.title} onChange={(e) => updateConfig('title', e.target.value)} />
 					</CFormGroup>
+					<legend>Trigger</legend>
 					<CFormGroup>
 						<label>Button</label>
 						<CInput
@@ -106,6 +107,7 @@ export function ScheduleEditModal({ doClose, doSave, item, plugins }) {
 							title="Must be in format BANK#.BUTTON#, for example 1.1 or 99.32. Bank max is 99, button max is 32."
 						/>
 					</CFormGroup>
+					<legend>Condition</legend>
 					<CFormGroup>
 						<label>Type</label>
 						<Select
@@ -198,12 +200,7 @@ function ScheduleEditModalConfig({ pluginSpec, config, updateConfig }) {
 	if (pluginSpec.type === 'feedback') {
 		return (
 			<>
-				<table style={{ width: '100%' }}>
-					<thead>
-						<tr>
-							<th>Feedbacks</th>
-						</tr>
-					</thead>
+				<table className="table feedback-table">
 					<tbody>
 						{config.map((conf, i) => (
 							<tr key={i}>
