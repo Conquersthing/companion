@@ -313,9 +313,6 @@ function ScheduleEditModalInput({ spec, value, onChange }) {
 				/>
 			)
 		}
-		case 'feedback': {
-			return <p>TODO</p>
-		}
 		default:
 			return <p>Unknown input: "{spec.type}"</p>
 	}
